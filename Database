@@ -1,0 +1,168 @@
+package Revision;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
+
+/**
+ * Created by Marcus on 23/05/2017.
+ */
+public class Database extends JFrame {
+JPanel Left, Right, jpFN,jpLN,jpPC,jpBU;
+JLabel menu,left,fname,lname,pc;
+JTextField FName,LName,PC;
+JButton close,submit;
+JTextArea right;
+
+
+    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Test","root","root");
+    Statement st = conn.createStatement();
+
+
+
+    public Database() throws SQLException {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        setLayout(new GridLayout(1,2));
+        setSize(700,300);
+        Left = new JPanel(new GridLayout(4,1));
+        jpFN = new JPanel(new GridLayout(1,2));
+        jpLN = new JPanel(new GridLayout(1,2));
+        jpPC = new JPanel(new GridLayout(1,2));
+        jpBU = new JPanel(new GridLayout(1,2));
+        Right = new JPanel(new BorderLayout());
+
+        fname = new JLabel("First Name: ");
+        lname = new JLabel("Last Name: ");
+        pc = new JLabel("Post Code: ");
+        menu = new JLabel("There are currently: " + SQLNum() + " Students");
+        right = new JTextArea(20,30);
+        right.setText(SQL());
+        right.setWrapStyleWord(true);
+        FName = new JTextField(15);
+        LName = new JTextField(15);
+        PC = new JTextField(6);
+
+        buttonHandler bh = new buttonHandler(this);
+        submit = new JButton("Submit");
+        submit.addActionListener(bh);
+        close = new JButton("Close");
+        close.addActionListener(bh);
+        jpFN.add(fname);
+        jpFN.add(FName);
+        jpLN.add(lname);
+        jpLN.add(LName);
+        jpPC.add(pc);
+        jpPC.add(PC);
+        jpBU.add(submit);
+        jpBU.add(close);
+
+        Left.add(jpFN);
+        Left.add(jpLN);
+        Left.add(jpPC);
+        Left.add(jpBU);
+        Right.add(menu,BorderLayout.NORTH);
+        Right.add(right, BorderLayout.CENTER);
+        add(Left);
+        add(Right);
+
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+    }
+
+    class buttonHandler implements ActionListener{
+        Database db;
+
+        buttonHandler(Database db){
+            this.db = db;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(e.getSource().equals(submit)){
+                if(FName.getText().length()>0 && LName.getText().length()>0 && PC.getText().length()>0 && PC.getText().length()<7){
+                    try {
+                        //st.executeUpdate("INSERT INTO Students VALUES(null,'"+FName.getText()+"','"+LName.getText()+"','" + PC.getText()+"')");
+                        PreparedStatement ps = conn.prepareStatement("INSERT INTO Students VALUES(NULL,?,?,?)");
+                        ps.setString(1,FName.getText());
+                        ps.setString(2,LName.getText());
+                        ps.setString(3,PC.getText());
+                        ps.executeUpdate();
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                right.setText(SQL());
+                menu.setText("There are currently: "+ SQLNum() + " Students");
+                FName.setText("");
+                LName.setText("");
+                PC.setText("");
+
+        } else if(e.getSource().equals(close)){
+                try {
+                    st.close();
+                    conn.close();
+                    System.exit(0);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+    }
+    }
+    public String SQL(){
+        String SQL = "";
+        ResultSet rs = null;
+        try {
+            rs = st.executeQuery("SELECT * FROM Students;");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            while(rs.next()){
+                SQL = SQL + ("Student Number: " + rs.getObject(1) + " Student First Name: " + rs.getObject(2))+"\n";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return SQL;
+    }
+
+    public int SQLNum(){
+        int SQL = 0;
+        ResultSet rs = null;
+        try {
+            rs = st.executeQuery("SELECT * FROM Students;");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            while(rs.next()){
+                SQL++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return SQL;
+    }
+
+
+
+    public static void main(String[] args) {
+        try {
+            new Database();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
