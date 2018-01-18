@@ -22,7 +22,7 @@ public class Calculator extends JFrame{
     ScriptEngine engine = mgr.getEngineByName("JavaScript");
 
     Calculator(){
-        setTitle("Calculator");
+        setTitle("Revision.Calculator");
         setLayout(new GridLayout(1,2));
 
 

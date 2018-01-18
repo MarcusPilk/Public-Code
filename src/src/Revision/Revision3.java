@@ -14,7 +14,7 @@ public class Revision3 extends JFrame{
     JPanel jp;
 
     Revision3(){
-        setTitle("Calculator");
+        setTitle("Revision.Calculator");
         jp = new JPanel(new GridLayout(1,5));
         jta1 = new JTextField("");
         jta2 = new JTextField("");
